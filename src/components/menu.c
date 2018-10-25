@@ -17,7 +17,9 @@
 
 // Functions
 
-// Destroy and free the memory allocated for the given menu
+/*
+ * Destroy and free the memory allocated for the given menu
+ */
 void win32_api_destroy_menu(win32_api_menu* out_menu){
     if(out_menu->max_number_submenus > 0){
         win32_api_submenu* current_submenu;
@@ -38,3 +40,16 @@ void win32_api_destroy_menu(win32_api_menu* out_menu){
     }
     free(out_menu);
 }
+
+/*
+ * Create a menu
+ */
+void win32_api_create_menu(
+    const char* in_window_title,
+    const char* in_text,
+    const unsigned short in_number_submenus,
+    void (*in_on_click)()
+){
+}
+
+

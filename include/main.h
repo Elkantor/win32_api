@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <windows.h>
 void win32_api_end();
-void win32_app_show_windows();
+void win32_api_show_windows();
 #include <stdlib.h>
 #include <stdbool.h>
 void win32_api_end_window();

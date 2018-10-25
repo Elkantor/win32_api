@@ -4,16 +4,17 @@
 #include <stdbool.h>
 #include <stdio.h>
 typedef struct win32_api_window win32_api_window;
-void win32_api_initialize_window(win32_api_window *out_window);
-void win32_app_show_windows();
+bool win32_api_initialize_window(win32_api_window *out_window);
+bool win32_api_show_windows();
 void win32_api_destroy_window(win32_api_window *out_window);
 void win32_api_end();
-void win32_api_initialize(const unsigned int in_number_windows);
+bool win32_api_reallocate_windows_array();
+bool win32_api_initialize();
 typedef struct win32_api_window_manager win32_api_window_manager;
 struct win32_api_window_manager {
         win32_api_window* windows;
         char max_number_windows;
-        char current_index_window;
+        char current_index_windows;
     };
 extern win32_api_window_manager window_manager;
 typedef struct win32_api_menu win32_api_menu;

@@ -24,17 +24,16 @@ void win32_api_destroy_menu(win32_api_menu *out_menu);
 #include <stdio.h>
 typedef struct win32_api_window win32_api_window;
 void win32_api_destroy_window(win32_api_window *out_window);
-void win32_api_end_window();
 LRESULT CALLBACK win32_api_window_proc(HWND in_hwnd,UINT in_msg,WPARAM in_wparam,LPARAM in_lparam);
-void win32_api_initialize_window(win32_api_window *out_window);
+bool win32_api_initialize_window(win32_api_window *out_window);
 typedef struct win32_api_window_manager win32_api_window_manager;
 struct win32_api_window_manager {
         win32_api_window* windows;
         char max_number_windows;
-        char current_index_window;
+        char current_index_windows;
     };
 extern win32_api_window_manager window_manager;
-void win32_api_begin_window(const char *in_window_class_name,const char *in_window_title,const int in_pos_x,const int in_pos_y,const int in_width,const int in_height,const unsigned int in_number_menus);
+bool win32_api_create_window(const char *in_window_class_name,const char *in_window_title,const int in_pos_x,const int in_pos_y,const int in_width,const int in_height,const unsigned int in_number_menus);
 struct win32_api_window {
         HWND hwnd;
         HMODULE hinstance;

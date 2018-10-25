@@ -1,13 +1,12 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include "main.h"
 
 int main(int argc, char* argv[]){ 
-    win32_api_initialize(1);
-    win32_api_begin_window("window_class_name", "main_window", 600, 300, 800, 600, 1);
-    win32_api_end_window();
-
+    win32_api_initialize();
+    win32_api_create_window("window_class_name", "main_window", 600, 300, 800, 600, 1);
     while(1){
-        win32_app_show_windows();
+        win32_api_show_windows();
     }
 
     win32_api_end();

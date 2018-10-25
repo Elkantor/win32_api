@@ -26,7 +26,10 @@
 
 // Functions
 
-void win32_api_begin_window(
+/*
+ * Create a window in memory
+ */
+bool win32_api_create_window(
     const char* in_window_class_name,
     const char* in_window_title,
     const int in_pos_x,
@@ -35,7 +38,24 @@ void win32_api_begin_window(
     const int in_height,
     const unsigned int in_number_menus
 ){
-    win32_api_window* current_window = &window_manager.windows[window_manager.current_index_window];
+    // Test if the current_index_windows value is not equal or bigger than the max_number_windows value of the window_manager
+    if(window_manager.current_index_windows >= window_manager.max_number_windows){
+        printf("ERROR: A problem occured when trying to create the %s window. The current_index_windows is equals or greater than the max_number_windows value of the window_manager.\n", in_window_title);
+        return false;
+    }
+    
+    win32_api_window* current_window = &window_manager.windows[window_manager.current_index_windows];
+     
+    // Allocate the memory for the menus 
+    if(in_number_menus > 0){
+        current_window->menus = (win32_api_menu*) calloc(in_number_menus, sizeof(win32_api_menu));
+        
+        // Test if the allocation has been correclty done
+        if(current_window->menus == NULL){
+            printf("ERROR: A Problem occured when initializing the menus of the %s window, inside the \"win32_api_begin_window\" function.\n", in_window_title);
+            return false;
+        }
+    }
 
     current_window->hinstance = GetModuleHandle(0);
     current_window->class_name = in_window_class_name;
@@ -45,22 +65,15 @@ void win32_api_begin_window(
     current_window->width = in_width;
     current_window->height = in_height;
     current_window->max_number_menus = in_number_menus;
-    current_window->current_index_menus = 1;
+    current_window->current_index_menus = 0;
     current_window->ready = false;
-    
-    // Allocate the memory for the menus 
-    if(in_number_menus > 0){
-        current_window->menus = (win32_api_menu*) calloc(in_number_menus, sizeof(win32_api_menu));
-        // Test if the allocation has been correclty done
-        if(current_window->menus == NULL){
-            printf("ERROR: A Problem occured when initializing the menus of the %s window, inside the \"win32_api_begin_window\" function.\n", in_window_title);
-            exit(1);
-        }
-    }
+    return true;
 }
 
-// Initialize a window
-void win32_api_initialize_window(win32_api_window* out_window){
+/*
+ * Initialize a window
+ */
+bool win32_api_initialize_window(win32_api_window* out_window){
     // Create the window using the win32 api
     WNDCLASSEX wc;
 
@@ -82,7 +95,7 @@ void win32_api_initialize_window(win32_api_window* out_window){
     // during the step 1
     if(!RegisterClassEx(&wc)){
         MessageBox(NULL, "Window Registration Failed !", "Error !", MB_ICONEXCLAMATION | MB_OK);
-        return;
+        return false;
     }
 
     // Step 2: Creating the window
@@ -105,7 +118,7 @@ void win32_api_initialize_window(win32_api_window* out_window){
     // during the step 2
     if(out_window->hwnd == NULL){
         MessageBox(NULL, "Window Creation Failed !", "Error !", MB_ICONEXCLAMATION | MB_OK);
-        return;
+        return false;
     }
 
     STARTUPINFOA startup_info;
@@ -113,10 +126,15 @@ void win32_api_initialize_window(win32_api_window* out_window){
     ShowWindow(out_window->hwnd, SW_SHOWDEFAULT);
     UpdateWindow(out_window->hwnd);
 
+    // The window is now ready to be drawn on the screen
     out_window->ready = true;
+
+    return true;
 }
 
-// Window default procedure function
+/*
+ * Window default procedure function
+ */
 LRESULT CALLBACK win32_api_window_proc(
     HWND in_hwnd,
     UINT in_msg,
@@ -169,12 +187,9 @@ LRESULT CALLBACK win32_api_window_proc(
     return 0;
 }
 
-// End the creation of a window
-void win32_api_end_window(){
-    window_manager.current_index_window++;
-}
-
-// Destroy and free the memory allocated for the given window
+/*
+ * Destroy and free the memory allocated for the given window
+ */
 void win32_api_destroy_window(win32_api_window* out_window){
     win32_api_menu* current_menu;
     // free every menu inside the window

@@ -1,5 +1,6 @@
 /* This file was automatically generated.  Do not edit! */
 #include <stdlib.h>
+void win32_api_create_menu(const char *in_window_title,const char *in_text,const unsigned short in_number_submenus,void(*in_on_click)());
 typedef struct win32_api_submenu win32_api_submenu;
 typedef struct win32_api_menu win32_api_menu;
 struct win32_api_menu {

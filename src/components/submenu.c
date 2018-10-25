@@ -13,7 +13,9 @@
 
 // Functions
 
-// Destroy and free the memory allocated for the given submenu
+/*
+ * Destroy and free the memory allocated for the given submenu
+ */
 void win32_api_destroy_submenu(win32_api_submenu* out_submenu){
     free(out_submenu);
 }
