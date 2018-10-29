@@ -38,13 +38,15 @@ bool win32_api_create_window(
     const int in_height,
     const unsigned int in_number_menus
 ){
-    // Test if the current_index_windows value is not equal or bigger than the max_number_windows value of the window_manager
-    if(window_manager.current_index_windows >= window_manager.max_number_windows){
-        printf("ERROR: A problem occured when trying to create the %s window. The current_index_windows is equals or greater than the max_number_windows value of the window_manager.\n", in_window_title);
-        return false;
+        // Test if the number_windows of the windows array is equal to the max_number_windows (that means that the default allocation of 10 windows for this application is passed, and we need to reallocate the windows array of the window_manager)
+    if(window_manager.number_windows >= window_manager.max_number_windows){
+        // Test if the reallocation has correclty been done
+        if(!win32_api_reallocate_windows_array()){
+            return false;
+        }
     }
     
-    win32_api_window* current_window = &window_manager.windows[window_manager.current_index_windows];
+    win32_api_window* current_window = &window_manager.windows[window_manager.number_windows];
      
     // Allocate the memory for the menus 
     if(in_number_menus > 0){
@@ -67,6 +69,11 @@ bool win32_api_create_window(
     current_window->max_number_menus = in_number_menus;
     current_window->current_index_menus = 0;
     current_window->ready = false;
+
+    printf("window %s correclty added at index %d\n", current_window->title, window_manager.number_windows);
+    // Increment the number_windows of the window_manager
+    window_manager.number_windows++;
+
     return true;
 }
 
@@ -145,6 +152,7 @@ LRESULT CALLBACK win32_api_window_proc(
     HDC hdc;
     HMENU submenu, menu;
     char window_title[256];
+    unsigned short window_index;
 
     switch(in_msg){
         case WM_CREATE:
@@ -174,7 +182,16 @@ LRESULT CALLBACK win32_api_window_proc(
         case WM_KEYDOWN:
             break;
         case WM_CLOSE:
-            DestroyWindow(in_hwnd);
+            // Get the title of the current window
+            GetWindowTextA(in_hwnd, window_title, sizeof(window_title));
+            // Get the index of the current window, in the windows array
+            // of the window_manager, and test if this current window is actually
+            // in this array
+            if(win32_api_get_window_index(window_title, &window_index)){
+                // If the window index has been found, the window is indeed in the  
+                // windows array, so destroy it (and free the memory)
+                win32_api_destroy_window(window_index);
+            }
             break;
         case WM_DESTROY:
             PostQuitMessage(0);
@@ -188,14 +205,44 @@ LRESULT CALLBACK win32_api_window_proc(
 }
 
 /*
+ * Get the index of a window in the windows array (inside the window_manager)
+ */
+bool win32_api_get_window_index(
+    const char* in_window_title,
+    unsigned short* out_window_index
+){
+    // For each window in the array, check if the in_window_title 
+    // match one of the window title
+    for(unsigned short i = 0; i < window_manager.number_windows; i++){
+        if(strcmp(in_window_title, window_manager.windows[i].title) == 0){
+            *out_window_index = i;
+            return true;
+        }
+    }
+    return false;
+}
+
+/*
  * Destroy and free the memory allocated for the given window
  */
-void win32_api_destroy_window(win32_api_window* out_window){
-    win32_api_menu* current_menu;
-    // free every menu inside the window
-    for(unsigned short i = 0; i < out_window->max_number_menus; i++){
-        current_menu = &out_window->menus[i];
+bool win32_api_destroy_window(const short in_index_window){
+    win32_api_window* current_window = &window_manager.windows[in_index_window];
+    win32_api_menu* current_menu;    
+
+   
+    // Free every menu inside the window
+    for(unsigned short i = 0; i < current_window->max_number_menus; i++){
+        current_menu = &current_window->menus[i];
         win32_api_destroy_menu(current_menu);
     }
-    free(out_window);
+    
+    // Call win32 api to free the memory of the hwnd pointer
+    DestroyWindow(current_window->hwnd);
+   
+    // Shift the windows pointers in the windows array (inside the window_manager), before freeing the window from memory
+    win32_api_shift_windows_indexes(in_index_window);   
+    // Decrement the number of windows in the windows array (inside the window_manager)
+    window_manager.number_windows--;
+   
+    return true;
 }

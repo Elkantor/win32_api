@@ -1,12 +1,13 @@
 /* This file was automatically generated.  Do not edit! */
-#include <windows.h>
-#include <stdlib.h>
-#include <stdbool.h>
 #include <stdio.h>
+#include <windows.h>
+#include <stdbool.h>
+void win32_api_shift_windows_indexes(const char in_index_window_destroyed);
+#include <stdlib.h>
 typedef struct win32_api_window win32_api_window;
 bool win32_api_initialize_window(win32_api_window *out_window);
 bool win32_api_show_windows();
-void win32_api_destroy_window(win32_api_window *out_window);
+bool win32_api_destroy_window(const short in_index_window);
 void win32_api_end();
 bool win32_api_reallocate_windows_array();
 bool win32_api_initialize();
@@ -14,7 +15,7 @@ typedef struct win32_api_window_manager win32_api_window_manager;
 struct win32_api_window_manager {
         win32_api_window* windows;
         char max_number_windows;
-        char current_index_windows;
+        char number_windows;
     };
 extern win32_api_window_manager window_manager;
 typedef struct win32_api_menu win32_api_menu;
